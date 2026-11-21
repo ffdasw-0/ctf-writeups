@@ -7,24 +7,35 @@
 
 ## 壳检测
 DIE检测有无壳
+
 ![DIE检测](./img/die检测.png)
+
 使用go语言编写,无壳
 
 ## 题目描述
 题目将输入的值先进行AES加密,再通过base58编码,与内置的结果对比
 由此可知flag通过内置的值先base58解码再进行AES解密得到
+
 ![加密部分](./img/加密部分.png)
+
 主函数里没有找到内置结果
 但是他使用base58后的值进行了makechan
+
 ![传值部分](./img/传输.png)
+
 程序一共使用了两个makechan
 并作为值传进了main_main_gowrap1里
+
 ![线程创建](./img/线程创建.png)
+
 点进main_main_gowrap1立刻发现了memequal函数
 里面直接写着比较的值
+
 ![gowrap1](./img/wrap.png)
+
 前面加密部分他的AESkey也写在函数里
 由此我们编写解密脚本得出flag
+
 ![flag](./img/flag.png)
 
 
