@@ -1,11 +1,17 @@
 # ez_go
+
 > 比赛：浙江省大学生CTF 2026
+
 > 类别：Reverse
+
 > 难度：Easy
+
 > 考点：AES加密 base58编码
+
 > flag：`DASCTF{f8163a11-0730-40fe-90c4-44230300163a}`
 
 ## 壳检测
+
 DIE检测有无壳
 
 ![DIE检测](./img/die检测.png)
@@ -13,6 +19,7 @@ DIE检测有无壳
 使用go语言编写,无壳
 
 ## 题目描述
+
 题目将输入的值先进行AES加密,再通过base58编码,与内置的结果对比
 由此可知flag通过内置的值先base58解码再进行AES解密得到
 
@@ -40,6 +47,7 @@ DIE检测有无壳
 
 
 ## EXP
+
 ```python
 import base58
 from Crypto.Cipher import AES
